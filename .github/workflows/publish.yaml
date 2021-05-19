@@ -7,8 +7,9 @@ on:
         description: 'SemVer format release tag, i.e. 0.23.4'
         required: true
 env:
-  package_name: "kedro_dolt"
-  python_version: "3.8"
+  package_name: 'kedro_dolt'
+  python_version: '3.8'
+
 
 jobs:
   bump-version:
