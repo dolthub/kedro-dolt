@@ -6,6 +6,9 @@ on:
       version:
         description: 'SemVer format release tag, i.e. 0.23.4'
         required: true
+env:
+  package_name: "kedro_dolt"
+  python_version: "3.8"
 
 jobs:
   bump-version:
@@ -13,7 +16,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: [${{ env.python_version }}]
 
     steps:
       - uses: actions/checkout@v2
@@ -31,7 +34,7 @@ jobs:
       - name: Install poetry dependencies
         run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      - name: Update Doltcli version
+      - name: Update $${ env.package_version}} version
         run: |
           sed -i 's/^version = \S*/version = "'"$VERSION"'"/' "$FILE"
         env:
@@ -39,7 +42,7 @@ jobs:
           VERSION: ${{ github.event.inputs.version }}
       - uses: EndBug/add-and-commit@v7
         with:
-          message: ${{ format('[ga-bump-release] update Doltcli version to {0}', github.event.inputs.version) }}
+          message: ${{ format('[ga-bump-release] update {0} version to {1}', env.package_name, github.event.inputs.version) }}
           add: ${{ format('{0}/pyproject.toml', github.workspace) }}
           cwd: "."
       - name: Create Release
