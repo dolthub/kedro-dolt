@@ -1,9 +1,10 @@
-line_length = 120
+line_length = 95
 
 .PHONY: fmt
 fmt: ## Format code with black and isort
 	black . -t py37 --line-length=${line_length}
 	isort .
+	black . --check -t py37 --line-length=${line_length}
 
 .PHONY: lint
 lint: ## Run linters
