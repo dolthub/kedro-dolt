@@ -43,10 +43,7 @@ class DoltHook:
 
     @hook_impl
     def before_pipeline_run(self, run_params: Dict[str, Any]):
-        if (
-            "branch" in run_params["extra_params"]
-            and run_params["extra_params"]["branch"] is not None
-        ):
+        if "branch" in run_params["extra_params"] and run_params["extra_params"]["branch"] is not None:
             self._branch = run_params["extra_params"]["branch"]
             self._original_branch = self._active_branch()
             self._checkout_branch(self._branch)
@@ -107,9 +104,7 @@ class DoltHook:
             connection.commit()
 
     @hook_impl
-    def register_config_loader(
-        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
-    ) -> ConfigLoader:
+    def register_config_loader(self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]) -> ConfigLoader:
         return ConfigLoader(conf_paths)
 
     @hook_impl
@@ -121,6 +116,4 @@ class DoltHook:
         save_version: str,
         journal: Journal,
     ) -> DataCatalog:
-        return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version, journal
-        )
+        return DataCatalog.from_config(catalog, credentials, load_versions, save_version, journal)
