@@ -45,7 +45,7 @@ def sql_server(doltdb_path):
         p = subprocess.Popen(
             shlex.split("dolt sql-server --max-connections=10 -l=trace"),
         )
-        time.sleep(0.05)
+        time.sleep(0.06)
         yield p
     finally:
         os.chdir(starting_path)
