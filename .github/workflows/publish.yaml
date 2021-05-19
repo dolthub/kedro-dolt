@@ -8,7 +8,6 @@ on:
         required: true
 env:
   package_name: 'kedro_dolt'
-  python_version: '3.8'
 
 
 jobs:
@@ -17,7 +16,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python-version: [${{ env.python_version }}]
+        python-version: ['3.8']
 
     steps:
       - uses: actions/checkout@v2
