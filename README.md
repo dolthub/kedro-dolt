@@ -10,3 +10,11 @@ repo](https://github.com/dolthub/kedro-dolt-demo?organization=dolthub&organizati
 shows an example of what this looks like in practice.
 
 The [plugin blog post (TODO)]() details Kedro, Dolt and the plugin.
+
+# Installation
+
+This plugin is available on PyPi:
+
+```bash
+$ pip install kedro-dolt
+```
