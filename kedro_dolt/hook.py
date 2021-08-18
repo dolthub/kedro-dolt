@@ -77,12 +77,8 @@ class DoltHook:
         res = None
         with self.connection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute("select active_branch()")
                 cursor.execute("select * from dolt_status")
                 status = cursor.fetchone()
-            connection.commit()
-        with self.connection() as connection:
-            with connection.cursor() as cursor:
                 if status is not None:
                     cursor.execute(f"select dolt_commit('-am', '{message}') as c")
                     res = cursor.fetchone()["c"]

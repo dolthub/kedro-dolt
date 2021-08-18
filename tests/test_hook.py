@@ -144,9 +144,6 @@ def test_after_pipeline_run_checkout(hook, conn, config):
         hook.after_pipeline_run(run_params=dict(run_id="f"))
 
         compare_active_branch(config, br)
-        #conn.execute("select active_branch() as b")
-        #res = conn.fetchone()["b"]
-        #assert res == br
 
 
 def test_after_pipeline_run_commit(hook, conn, config):
@@ -178,9 +175,6 @@ def test_e2e_pipeline_run_commit(hook, conn, config):
 
     hook.before_pipeline_run(dict(extra_params=dict(branch=workflow_branch)))
     compare_active_branch(config, workflow_branch)
-    #conn.execute("select active_branch() as b")
-    #mid_branch = conn.fetchone()["b"]
-    #assert mid_branch == workflow_branch
     assert hook._original_branch == starting_branch
 
     with new_connection(config) as conn:
