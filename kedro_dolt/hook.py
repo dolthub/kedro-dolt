@@ -104,6 +104,7 @@ class DoltHook:
                     cursor.execute(f"select dolt_checkout('-b', '{branch}')")
                 else:
                     cursor.execute(f"select dolt_checkout('{branch}')")
+                cursor.execute(f"set global dolt_sql_server_branch_ref = 'refs/heads/{branch}'")
             connection.commit()
 
     @hook_impl
