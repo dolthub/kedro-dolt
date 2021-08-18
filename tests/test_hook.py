@@ -60,32 +60,37 @@ def new_connection(config):
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def conn(sql_server, config):
     connection = new_connection(config)
     with connection as con:
         with con.cursor() as cursor:
             yield cursor
 
+def compare_active_branch(config, branch):
+    with new_connection(config) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("select active_branch() as b")
+            res = cursor.fetchone()["b"]
+            assert res == branch
 
 @pytest.fixture(scope="function")
 def hook(config):
     yield DoltHook(**config)
 
 
-def test_checkout_branch(hook, conn):
+def test_checkout_branch(hook, sql_server, config):
     branches = ["master", "new", "new2", "master"]
     for br in branches:
         hook._checkout_branch(branch=br)
-        conn.execute("select active_branch() as b")
-        res = conn.fetchone()["b"]
-        assert res == br
+        compare_active_branch(config, br)
 
 
 def test_active_branch(hook, conn):
     branches = ["master", "new", "master"]
     for br in branches:
         conn.execute(f"select dolt_checkout('{br}')")
+        conn.execute(f"set global dolt_sql_server_branch_ref = 'refs/heads/{br}'")
         assert br == hook._active_branch()
 
 
@@ -119,7 +124,7 @@ def test_commit_ok(hook, conn, config):
             assert res == commit
 
 
-def test_before_pipeline_run(hook, conn):
+def test_before_pipeline_run(hook, conn, config):
     hook.before_pipeline_run(dict(extra_params=dict(branch=None)))
     assert hook._original_branch is None
 
@@ -130,20 +135,18 @@ def test_before_pipeline_run(hook, conn):
     hook.before_pipeline_run(dict(extra_params=dict(branch="new")))
     assert hook._original_branch == "master"
 
-    conn.execute("select active_branch() as b")
-    res = conn.fetchone()["b"]
-    assert res == "new"
+    compare_active_branch(config, "new")
 
-
-def test_after_pipeline_run_checkout(hook, conn):
+def test_after_pipeline_run_checkout(hook, conn, config):
     branches = ["master", "new", "new2"]
     for br in branches:
         hook._original_branch = br
         hook.after_pipeline_run(run_params=dict(run_id="f"))
 
-        conn.execute("select active_branch() as b")
-        res = conn.fetchone()["b"]
-        assert res == br
+        compare_active_branch(config, br)
+        #conn.execute("select active_branch() as b")
+        #res = conn.fetchone()["b"]
+        #assert res == br
 
 
 def test_after_pipeline_run_commit(hook, conn, config):
@@ -174,22 +177,32 @@ def test_e2e_pipeline_run_commit(hook, conn, config):
     assert starting_branch != workflow_branch
 
     hook.before_pipeline_run(dict(extra_params=dict(branch=workflow_branch)))
-    conn.execute("select active_branch() as b")
-    mid_branch = conn.fetchone()["b"]
-    assert mid_branch == workflow_branch
+    compare_active_branch(config, workflow_branch)
+    #conn.execute("select active_branch() as b")
+    #mid_branch = conn.fetchone()["b"]
+    #assert mid_branch == workflow_branch
     assert hook._original_branch == starting_branch
 
-    conn.execute("create table test (a bigint)")
+    with new_connection(config) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("create table test (a bigint)")
+        conn.commit()
+
     commit = hook.after_pipeline_run(run_params=dict(run_id="f"))
     assert commit != starting_head
 
-    conn.execute("select HASHOF(active_branch()) as b")
-    master_head = conn.fetchone()["b"]
+    with new_connection(config) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("select HASHOF(active_branch()) as b")
+            master_head = cursor.fetchone()["b"]
+
     assert master_head == starting_head
 
-    conn.execute(f"select HASHOF('{workflow_branch}') as b")
-    workflow_head = conn.fetchone()["b"]
-    assert workflow_head == commit
+    with new_connection(config) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"select HASHOF('{workflow_branch}') as b")
+            workflow_head = cursor.fetchone()["b"]
+            assert workflow_head == commit
 
 
 def test_exceptions(hook):
