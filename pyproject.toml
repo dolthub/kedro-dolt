@@ -5,15 +5,16 @@ description = "Kedro-Dolt Plugin"
 authors = ["Max Hoffman <max@dolthub.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.6.2,<3.9"
+python = ">=3.7,<3.11"
 pymysql = "^1.0.2"
-kedro = ">=0.17.2"
+kedro = ">=0.18.4"
+typed-ast = ">=1.5.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
 pytest-cov = "^2.12.0"
 black = "^21.5b1"
-mypy = "^0.812"
+mypy = "^1.0.0"
 flake8 = "^3.9.2"
 isort = "^5.8.0"
 
